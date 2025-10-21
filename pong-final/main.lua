@@ -50,6 +50,8 @@ VIRTUAL_HEIGHT = 243
 -- paddle movement speed
 PADDLE_SPEED = 200
 
+
+current_mode = 'solo player'
 --[[
     Called just once at the beginning of the game; used to set up
     game objects, variables, etc. and prepare the game world.
@@ -229,12 +231,20 @@ function love.update(dt)
     -- paddles can move no matter what state we're in
     --
     -- player 1
-    if love.keyboard.isDown('w') then
+    if love.keyboard.isDown('z') then
         player1.dy = -PADDLE_SPEED
     elseif love.keyboard.isDown('s') then
         player1.dy = PADDLE_SPEED
     else
         player1.dy = 0
+    end
+
+    if love.keyboard.isDown('q') then
+        player1.dx= -PADDLE_SPEED
+    elseif love.keyboard.isDown('d') then
+        player1.dx= PADDLE_SPEED
+    else
+        player1.dx= 0
     end
 
     -- player 2
@@ -244,6 +254,16 @@ function love.update(dt)
         player2.dy = PADDLE_SPEED
     else
         player2.dy = 0
+    end
+
+    if current_mode == 'two players' then
+        direction = 0
+        if (player2.y - ball.y > 0) then 
+            direction = -1
+        else
+            direction = 1
+        end
+        player2.dy = PADDLE_SPEED * direction
     end
 
     -- update our ball based on its DX and DY only if we're in play state;
@@ -269,6 +289,12 @@ function love.keypressed(key)
         love.event.quit()
     -- if we press enter during either the start or serve phase, it should
     -- transition to the next appropriate state
+    elseif key == 'm' then
+        if current_mode == 'solo player' then
+            current_mode = 'two players'
+        else
+            current_mode = 'solo player'
+        end
     elseif key == 'enter' or key == 'return' then
         if gameState == 'start' then
             gameState = 'serve'
@@ -310,7 +336,8 @@ function love.draw()
         -- UI messages
         love.graphics.setFont(smallFont)
         love.graphics.printf('Welcome to Pong!', 0, 10, VIRTUAL_WIDTH, 'center')
-        love.graphics.printf('Press Enter to begin!', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Current mode is ' .. current_mode .. '. To switch mode, press the M key', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Press Enter to begin!', 0, 30, VIRTUAL_WIDTH, 'center')
     elseif gameState == 'serve' then
         -- UI messages
         love.graphics.setFont(smallFont)
